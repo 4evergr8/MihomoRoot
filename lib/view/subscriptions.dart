@@ -318,7 +318,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                             Text(
                               sub.total == 0
                                   ? '上传: ∞  下载: ∞  剩余: ∞'
-                                  : '上传: ${formatGB(sub.upload)}GB  下载: ${formatGB(sub.download)}GB  剩余: ${formatGB(sub.total - sub.upload - sub.downloaded)}GB',
+                                  : '上传: ${formatGB(sub.upload)}GB  下载: ${formatGB(sub.download)}GB  剩余: ${formatGB(sub.total - sub.upload - sub.download)}GB',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
 
