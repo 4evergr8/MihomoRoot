@@ -100,7 +100,7 @@ Future<DownloadResult> downloadYamlFile(String url, String ua) async {
 
     final result = await Process.run(
       'su',
-      ['-c', 'mkdir -p /data/adb/mihomo && cp $filePath /data/adb/mihomo/$id.yaml && chmod 600 /data/adb/mihomo/$id.yaml'],
+      ['-c', 'mkdir -p /data/adb/mihomo && cp $filePath /data/adb/mihomo/$id.yaml && chmod 777 /data/adb/mihomo/$id.yaml'],
     );
     if (result.exitCode != 0) throw Exception('root 拷贝失败: ${result.stderr}');
 
