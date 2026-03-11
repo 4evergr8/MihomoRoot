@@ -136,8 +136,8 @@ class SubscriptionInfo {
   String id;
   String link;
   String label;
-  int uploaded;
-  int downloaded;
+  int upload;
+  int download;
   int total;
   int expire;
 
@@ -145,8 +145,8 @@ class SubscriptionInfo {
     required this.id,
     required this.link,
     required this.label,
-    required this.uploaded,
-    required this.downloaded,
+    required this.upload,
+    required this.download,
     required this.total,
     required this.expire,
   });
@@ -156,8 +156,8 @@ class SubscriptionInfo {
       id: map['id'].toString(),
       link: map['label'] as String? ?? 'https://raw.githubusercontent.com/4evergr8/MihomoRoot/refs/heads/main/mihomo/example.yaml',
       label: map['label'] as String? ?? '订阅',
-      uploaded: map['up'] as int? ?? 0,
-      downloaded: map['down'] as int? ?? 0,
+      upload: map['up'] as int? ?? 0,
+      download: map['down'] as int? ?? 0,
       total: map['total'] as int? ?? 0,
       expire: map['expire'] as int? ?? 0
 
@@ -169,8 +169,8 @@ class SubscriptionInfo {
       'id': id,
       'link':link,
       'label': label,
-      'up': uploaded,
-      'down': downloaded,
+      'upload': upload,
+      'download': download,
       'total': total,
       'expire': expire,
     };
