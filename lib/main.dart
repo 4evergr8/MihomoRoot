@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
     MaterialTheme theme = MaterialTheme(textTheme);
 
     return MaterialApp(
-      title: '一个工具箱',
+      title: 'mihomoR',
       theme: brightness == Brightness.light ? theme.light() : theme.dark(),
       home: const HomeScreen(), // 使用 HomeScreen 组件
     );
