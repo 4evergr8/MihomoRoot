@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../service/sub.dart';
 import '../service/yaml.dart';
+import '../widget/pop.dart';
 
 class SubscriptionView extends StatefulWidget {
   const SubscriptionView({super.key});
@@ -40,6 +41,8 @@ class _SubscriptionViewState extends State<SubscriptionView> {
   /// 刷新订阅
   Future<void> _refreshSubscriptions() async {
     setState(() => isLoading = true);
+    if (!mounted) return;
+    final close = await showLoadingDialog(context, title: '加载中...');
 
     try {
       // 读取本地 YAML
@@ -66,8 +69,9 @@ class _SubscriptionViewState extends State<SubscriptionView> {
               expire: downloadResult.expire,
             ),
           );
+          close();
         } catch (_) {
-          // 如果刷新失败，保留原来的订阅
+          close();
           updatedSubs.add(sub);
         }
       }
@@ -82,19 +86,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
       setState(() => subscriptions = updatedSubs);
     } catch (e) {
       if (!mounted) return;
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('刷新错误'),
-          content: SingleChildScrollView(child: Text(e.toString())),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('关闭'),
-            ),
-          ],
-        ),
-      );
+      await showErrorDialog(context, '加载错误', e);
     } finally {
       if (mounted) setState(() => isLoading = false);
     }
@@ -119,21 +111,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
     } catch (e) {
       subscriptions = [];
       if (!mounted) return;
-
-      showDialog(
-        context: context,
-        builder:
-            (_) => AlertDialog(
-          title: const Text('加载错误'),
-          content: SingleChildScrollView(child: Text(e.toString())),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('关闭'),
-            ),
-          ],
-        ),
-      );
+      await showErrorDialog(context, '加载错误', e);
     } finally {
       if (mounted) {
         setState(() {
@@ -170,13 +148,9 @@ class _SubscriptionViewState extends State<SubscriptionView> {
     );
 
     if (result == null || result.isEmpty) return;
-
+    if (!mounted) return;
+    final close = await showLoadingDialog(context, title: '加载中...');
     try {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => const Center(child: CircularProgressIndicator()),
-      );
 
       final settings = await readYamlAsObject(settingsPath);
       final ua = settings['ua'];
@@ -203,24 +177,14 @@ class _SubscriptionViewState extends State<SubscriptionView> {
       await writeYamlFromObject(data, subscriptionsPath);
 
       setState(() {});
+      close();
     } catch (e) {
+      close();
       if (!mounted) return;
+      await showErrorDialog(context, '加载错误', e);
 
-      showDialog(
-        context: context,
-        builder:
-            (_) => AlertDialog(
-          title: const Text('加载错误'),
-          content: SingleChildScrollView(child: Text(e.toString())),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('关闭'),
-            ),
-          ],
-        ),
-      );
     } finally {
+      close();
       if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();
       }
