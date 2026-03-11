@@ -2,7 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../service/sub.dart';
 import '../service/yaml.dart';
-import '../widget/pop.dart';
+import '../widget.dart';
+
 
 class SubscriptionView extends StatefulWidget {
   const SubscriptionView({super.key});
