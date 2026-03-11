@@ -35,7 +35,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   @override
   Widget build(BuildContext context) {
     // 获取当前主题
-    final theme = Theme.of(context);
+
 
     return Scaffold(
       body: _widgetOptions.elementAt(_selectedIndex),
@@ -55,9 +55,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: theme.colorScheme.secondary, // 使用主题中的颜色
-        unselectedItemColor: theme.colorScheme.onSurface, // 使用主题中的未选中颜色
-        backgroundColor: theme.colorScheme.surface, // 使用主题中的背景颜色
+        selectedItemColor: Theme.of(context).colorScheme.secondary, // 使用主题中的颜色
+        unselectedItemColor: Theme.of(context).colorScheme.onSurface, // 使用主题中的未选中颜色
+        backgroundColor: Theme.of(context).colorScheme.surface, // 使用主题中的背景颜色
         onTap: _onItemTapped,
       ),
     );
