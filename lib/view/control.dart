@@ -123,7 +123,7 @@ class _ControlViewState extends State<ControlView> {
   }
 
   Widget bigButton(String text, VoidCallback onPressed, Color color) {
-    final scheme = Theme.of(context).colorScheme;
+
 
     return Expanded(
       child: SizedBox(
@@ -131,9 +131,9 @@ class _ControlViewState extends State<ControlView> {
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: color,
-            foregroundColor: color == scheme.primary
-                ? scheme.onPrimary
-                : scheme.onSecondary,
+            foregroundColor: color == Theme.of(context).colorScheme.primary
+                ? Theme.of(context).colorScheme.onPrimary
+                : Theme.of(context).colorScheme.onSecondary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -146,14 +146,14 @@ class _ControlViewState extends State<ControlView> {
   }
 
   Widget smallButton(String text, VoidCallback onPressed) {
-    final scheme = Theme.of(context).colorScheme;
+
 
     return Expanded(
       child: SizedBox(
         height: 50,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            foregroundColor: scheme.onPrimary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
