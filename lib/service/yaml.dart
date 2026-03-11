@@ -10,7 +10,7 @@ Future<Map<String, dynamic>> readYamlAsObject(String sourcePath) async {
 
     final result = await Process.run(
       'su',
-      ['-c', 'cp $sourcePath $localPath && chmod 600 $localPath'],
+      ['-c', 'cp $sourcePath $localPath && chmod 777 $localPath'],
     );
 
     if (result.exitCode != 0) {
