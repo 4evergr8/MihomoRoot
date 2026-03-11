@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 /// 下载结果
 class DownloadResult {
   final String id;
+  final String link;
   final String label;
   final int upload;
   final int download;
@@ -14,6 +15,7 @@ class DownloadResult {
 
   DownloadResult({
     required this.id,
+    required this.link,
     required this.label,
     required this.upload,
     required this.download,
@@ -104,6 +106,7 @@ Future<DownloadResult> downloadYamlFile(String url, String ua) async {
 
     return DownloadResult(
       id: id,
+      link:url,
       label: label,
       upload: upload,
       download: downloadBytes,
@@ -150,42 +153,45 @@ Map<String, dynamic> overwriteYamlObject(Map<String, dynamic> base, Map<String, 
 /// 订阅数据类
 class SubscriptionInfo {
   String id;
+  String link;
   String label;
   int uploaded;
   int downloaded;
   int total;
-  DateTime expireDate;
+  int expire;
 
   SubscriptionInfo({
     required this.id,
+    required this.link,
     required this.label,
     required this.uploaded,
     required this.downloaded,
     required this.total,
-    required this.expireDate,
+    required this.expire,
   });
 
   factory SubscriptionInfo.fromMap(Map<String, dynamic> map) {
     return SubscriptionInfo(
       id: map['id'].toString(),
+      link: map['label'] as String? ?? 'https://raw.githubusercontent.com/4evergr8/MihomoRoot/refs/heads/main/mihomo/example.yaml',
       label: map['label'] as String? ?? '订阅',
       uploaded: map['up'] as int? ?? 0,
       downloaded: map['down'] as int? ?? 0,
       total: map['total'] as int? ?? 0,
-      expireDate: DateTime.fromMillisecondsSinceEpoch(
-        (map['expire'] ?? DateTime.now().millisecondsSinceEpoch ~/ 1000) * 1000,
-      ),
+      expire: map['expire'] as int? ?? 0
+
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'link':link,
       'label': label,
       'up': uploaded,
       'down': downloaded,
       'total': total,
-      'expire': expireDate.millisecondsSinceEpoch ~/ 1000,
+      'expire': expire,
     };
   }
 }
