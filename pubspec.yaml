@@ -16,6 +16,7 @@ dependencies:
   sqflite: any
   flutter_js: any
   yaml_codec: any
+  fluttertoast: any
 
   dio: any
   flutter:
