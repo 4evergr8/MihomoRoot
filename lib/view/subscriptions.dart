@@ -239,7 +239,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '订阅 ${sub.label}',
+                      sub.label,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 12),
