@@ -13,34 +13,35 @@ class ControlView extends StatefulWidget {
 
 class _ControlViewState extends State<ControlView> {
   List<String> delays = ["--", "--", "--"];
+  final String settingsPath = '/data/adb/mihomo/settings.yaml';
+
 
   Future<void> start() async {
-    final settings = await readYamlAsObject("/data/adb/mihomo/settings.yaml");
+    final settings = await readYamlAsObject(settingsPath);
     final start = settings['start'];
     await Process.start("sh", ["-c", start]);
   }
 
   Future<void> kill() async {
-    final settings = await readYamlAsObject("/data/adb/mihomo/settings.yaml");
+    final settings = await readYamlAsObject(settingsPath);
     final kill = settings['kill'];
     await Process.start("sh", ["-c", kill]);
   }
 
   Future<void> openWeb() async {
-    final settings = await readYamlAsObject("/data/adb/mihomo/settings.yaml");
+    final settings = await readYamlAsObject(settingsPath);
     final port = settings['port'];
     final uri = Uri.parse("http://127.0.0.1:$port");
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   Future<void> reloadConfig() async {
-    final settings = await readYamlAsObject("/data/adb/mihomo/settings.yaml");
+    final settings = await readYamlAsObject(settingsPath);
     final dio = Dio();
     final port = settings['port'];
     await dio.put('http://127.0.0.1:$port/configs?force=true');
   }
 
-  /// 顺序测试三个延迟,超时2秒
   Future<void> testDelays() async {
     final urls = [
       "https://www.google.com",
@@ -53,6 +54,7 @@ class _ControlViewState extends State<ControlView> {
       connectTimeout: const Duration(seconds: 2),
       receiveTimeout: const Duration(seconds: 2),
     ));
+
     for (int i = 0; i < urls.length; i++) {
       try {
         final sw = Stopwatch()..start();
@@ -60,7 +62,6 @@ class _ControlViewState extends State<ControlView> {
         sw.stop();
         results.add(sw.elapsedMilliseconds.toString());
       } catch (_) {
-        // 超时或请求失败,后面全部标记超时
         results.add("超时");
         for (int j = i + 1; j < urls.length; j++) {
           results.add("超时");
@@ -74,42 +75,62 @@ class _ControlViewState extends State<ControlView> {
     });
   }
 
-  Widget delayCard(String title, String delay, VoidCallback onRefresh) {
-    return Expanded(
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Stack(
+  Widget delayCardGroup(VoidCallback onRefresh) {
+    Widget item(String title, String delay) {
+      return Expanded(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(title, style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 12),
-                  Text(delay, style: Theme.of(context).textTheme.headlineSmall),
-                ],
-              ),
-            ),
-            Positioned(
-              right: 4,
-              top: 4,
-              child: IconButton(icon: const Icon(Icons.refresh, size: 18), onPressed: onRefresh),
-            )
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 12),
+            Text(delay, style: Theme.of(context).textTheme.headlineSmall),
           ],
         ),
+      );
+    }
+
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
+            child: Row(
+              children: [
+                item('Google', delays[0]),
+                item('Github', delays[1]),
+                item('Telegram', delays[2]),
+              ],
+            ),
+          ),
+          Positioned(
+            right: 4,
+            top: 4,
+            child: IconButton(
+              icon: const Icon(Icons.refresh, size: 18),
+              onPressed: onRefresh,
+            ),
+          )
+        ],
       ),
     );
   }
 
   Widget bigButton(String text, VoidCallback onPressed, Color color) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Expanded(
       child: SizedBox(
         height: 70,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: color,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            foregroundColor: color == scheme.primary
+                ? scheme.onPrimary
+                : scheme.onSecondary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
           onPressed: onPressed,
           child: Text(text, style: const TextStyle(fontSize: 18)),
@@ -119,12 +140,17 @@ class _ControlViewState extends State<ControlView> {
   }
 
   Widget smallButton(String text, VoidCallback onPressed) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Expanded(
       child: SizedBox(
         height: 50,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            foregroundColor: scheme.onPrimary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
           onPressed: onPressed,
           child: Text(text),
@@ -149,15 +175,7 @@ class _ControlViewState extends State<ControlView> {
               ],
             ),
             const SizedBox(height: 20),
-            Row(
-              children: [
-                delayCard('Google', delays[0], testDelays),
-                const SizedBox(width: 12),
-                delayCard('Github', delays[1], testDelays),
-                const SizedBox(width: 12),
-                delayCard('Telegram', delays[2], testDelays),
-              ],
-            ),
+            delayCardGroup(testDelays),
             const SizedBox(height: 20),
             Row(
               children: [
