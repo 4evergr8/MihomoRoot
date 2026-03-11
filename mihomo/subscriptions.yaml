@@ -1,6 +1,6 @@
 subscriptions: 
   - id: example
-    link:
+    link: https://raw.githubusercontent.com/4evergr8/MihomoRoot/refs/heads/main/mihomo/example.yaml
     label: 示例配置
     download: 0
     upload: 0
