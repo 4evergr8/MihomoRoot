@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../service/yaml.dart';
+import 'package:dart_ping/dart_ping.dart';
 
 class ControlView extends StatefulWidget {
   const ControlView({super.key});
@@ -47,34 +48,33 @@ class _ControlViewState extends State<ControlView> {
     await dio.put('http://127.0.0.1:$port/configs?force=true');
   }
 
+
+
   Future<void> testDelays() async {
-    final urls = [
-      "https://www.google.com",
-      "https://github.com",
-      "https://t.me"
+    final hosts = [
+      "www.google.com",
+      "github.com",
+      "t.me"
     ];
 
-    List<String> results = [];
-    final dio = Dio(BaseOptions(
-      connectTimeout: const Duration(seconds: 2),
-      receiveTimeout: const Duration(seconds: 2),
-    ));
-
-    for (int i = 0; i < urls.length; i++) {
-      final sw = Stopwatch()..start();
+    final futures = hosts.map((host) async {
       try {
-        await dio.get(urls[i]);
-        sw.stop();
-        results.add(sw.elapsedMilliseconds.toString());
-      } catch (_) {
-        sw.stop();
-        results.add("超时");
-        for (int j = i + 1; j < urls.length; j++) {
-          results.add("超时");
+        final ping = Ping(host, count: 1);
+
+        await for (final event in ping.stream) {
+          final r = event.response;
+          if (r != null) {
+            return r.time?.inMilliseconds.toString() ?? "超时";
+          }
         }
-        break;
+
+        return "超时";
+      } catch (_) {
+        return "超时";
       }
-    }
+    });
+
+    final results = await Future.wait(futures);
 
     setState(() {
       delays = results;
