@@ -49,10 +49,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
             icon: Icon(Icons.control_camera),
             label: '控制',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: '设置',
-          ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Theme.of(context).colorScheme.secondary, // 使用主题中的颜色
