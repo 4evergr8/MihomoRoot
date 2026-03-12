@@ -13,39 +13,44 @@ class ControlView extends StatefulWidget {
 }
 
 class _ControlViewState extends State<ControlView> {
-  List<String> delays = ["--", "--", "--"];
   final String settingsPath = '/data/adb/mihomo/settings.yaml';
+
+  String startCmd = '';
+  String stopCmd = '';
+  String webuiUrl = '';
+
+  List<String> delays = ["--", "--", "--"];
 
   @override
   void initState() {
     super.initState();
+    _loadSettings();
     testDelays();
   }
 
-  Future<void> start() async {
+  Future<void> _loadSettings() async {
     final settings = await readYamlAsObject(settingsPath);
-    final start = settings['start'];
-    await Process.start("sh", ["-c", start]);
+    setState(() {
+      startCmd = settings['start'] ?? '';
+      stopCmd = settings['kill'] ?? '';
+      webuiUrl = 'http://127.0.0.1:${settings['port'] ?? 9090}/ui';
+    });
   }
 
-  Future<void> kill() async {
-    final settings = await readYamlAsObject(settingsPath);
-    final kill = settings['kill'];
-    await Process.start("sh", ["-c", kill]);
+  Future<void> start() async {
+    if (startCmd.isEmpty) return;
+    await Process.start("sh", ["-c", startCmd]);
+  }
+
+  Future<void> stop() async {
+    if (stopCmd.isEmpty) return;
+    await Process.start("sh", ["-c", stopCmd]);
   }
 
   Future<void> openWeb() async {
-    final settings = await readYamlAsObject(settingsPath);
-    final port = settings['port'];
-    final uri = Uri.parse("http://127.0.0.1:$port/ui");
+    if (webuiUrl.isEmpty) return;
+    final uri = Uri.parse(webuiUrl);
     await launchUrl(uri, mode: LaunchMode.externalApplication);
-  }
-
-  Future<void> reloadConfig() async {
-    final settings = await readYamlAsObject(settingsPath);
-    final dio = Dio();
-    final port = settings['port'];
-    await dio.put('http://127.0.0.1:$port/configs?force=true');
   }
 
   Future<void> testDelays() async {
@@ -54,8 +59,9 @@ class _ControlViewState extends State<ControlView> {
       try {
         final ping = Ping(host, count: 1);
         await for (final event in ping.stream) {
-          final r = event.response;
-          if (r != null) return r.time?.inMilliseconds.toString() ?? "超时";
+          if (event.response != null) {
+            return event.response!.time?.inMilliseconds.toString() ?? "超时";
+          }
         }
         return "超时";
       } catch (_) {
@@ -63,9 +69,43 @@ class _ControlViewState extends State<ControlView> {
       }
     });
     final results = await Future.wait(futures);
-    setState(() {
-      delays = results;
-    });
+    if (!mounted) return;
+    setState(() => delays = results);
+  }
+
+  Widget _buildButtonRow({
+    required String label,
+    required IconData icon,
+    required VoidCallback onPressed,
+    required String value,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          ElevatedButton.icon(
+            onPressed: onPressed,
+            icon: Icon(icon),
+            label: Text(label),
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(120, 50),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextField(
+              controller: TextEditingController(text: value),
+              readOnly: true,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -76,7 +116,29 @@ class _ControlViewState extends State<ControlView> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // 第一块：测速，二级颜色
+            // 启动按钮行
+            _buildButtonRow(
+              label: '启动',
+              icon: Icons.play_arrow,
+              onPressed: start,
+              value: startCmd,
+            ),
+            // 停止按钮行
+            _buildButtonRow(
+              label: '停止',
+              icon: Icons.stop,
+              onPressed: stop,
+              value: stopCmd,
+            ),
+            // WEBUI按钮行
+            _buildButtonRow(
+              label: 'WEBUI',
+              icon: Icons.language,
+              onPressed: openWeb,
+              value: webuiUrl,
+            ),
+            const SizedBox(height: 20),
+            // 测速块
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -112,82 +174,6 @@ class _ControlViewState extends State<ControlView> {
                     color: Theme.of(context).colorScheme.primary,
                     onPressed: testDelays,
                   )
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            // 第二块：四个按钮，一级颜色
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 60,
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).colorScheme.primary,
-                            ),
-                            onPressed: start,
-                            icon: const Icon(Icons.play_arrow),
-                            label: const Text('启动', style: TextStyle(fontSize: 18)),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: SizedBox(
-                          height: 60,
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).colorScheme.error,
-                            ),
-                            onPressed: kill,
-                            icon: const Icon(Icons.stop),
-                            label: const Text('停止', style: TextStyle(fontSize: 18)),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 60,
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).colorScheme.primary,
-                            ),
-                            onPressed: openWeb,
-                            icon: const Icon(Icons.language),
-                            label: const Text('WEBUI', style: TextStyle(fontSize: 18)),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: SizedBox(
-                          height: 60,
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).colorScheme.primary,
-                            ),
-                            onPressed: reloadConfig,
-                            icon: const Icon(Icons.refresh),
-                            label: const Text('重载配置', style: TextStyle(fontSize: 18)),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
