@@ -116,30 +116,71 @@ class _ControlViewState extends State<ControlView> {
         color: Theme.of(context).colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
+      child: Stack(
         children: [
-          Expanded(
-            child: TextField(
-              controller: TextEditingController(text: checkResult),
-              readOnly: true,
-              maxLines: null,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSecondaryContainer,
-              ),
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                isDense: true,
-                contentPadding: EdgeInsets.all(8),
-              ),
+          TextField(
+            controller: TextEditingController(text: checkResult),
+            readOnly: true,
+            maxLines: null,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSecondaryContainer,
+            ),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              isDense: true,
+              contentPadding: EdgeInsets.all(8),
             ),
           ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            color: Theme.of(context).colorScheme.primary,
-            onPressed: _runCheck,
+          Positioned(
+            top: 0,
+            right: 0,
+            child: IconButton(
+              icon: const Icon(Icons.refresh),
+              color: Theme.of(context).colorScheme.primary,
+              onPressed: _runCheck,
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('控制')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            _buildButtonRow(
+              label: '启动',
+              icon: Icons.play_arrow,
+              onPressed: start,
+              value: startCmd,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            ),
+            _buildButtonRow(
+              label: '停止',
+              icon: Icons.stop,
+              onPressed: stop,
+              value: stopCmd,
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            _buildButtonRow(
+              label: 'WEBUI',
+              icon: Icons.language,
+              onPressed: openWeb,
+              value: webuiUrl,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            ),
+            const SizedBox(height: 20),
+            _buildCheckBox(),
+          ],
+        ),
       ),
     );
   }
