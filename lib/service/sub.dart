@@ -156,8 +156,8 @@ class SubscriptionInfo {
       id: map['id'].toString(),
       link: map['label'] as String? ?? 'https://raw.githubusercontent.com/4evergr8/MihomoRoot/refs/heads/main/mihomo/example.yaml',
       label: map['label'] as String? ?? '订阅',
-      upload: map['up'] as int? ?? 0,
-      download: map['down'] as int? ?? 0,
+      upload: map['upload'] as int? ?? 0,
+      download: map['download'] as int? ?? 0,
       total: map['total'] as int? ?? 0,
       expire: map['expire'] as int? ?? 0
 
