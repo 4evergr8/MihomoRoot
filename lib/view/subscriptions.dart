@@ -308,78 +308,75 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                             const SizedBox(height: 12),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(6),
-                              child: Container(
-                                height: 12,
-                                color: Theme.of(context).colorScheme.surfaceVariant,
-                                child: Row(
-                                  children: [
-                                    if (sub.upload > 0)
-                                      Expanded(
-                                        flex: scale(sub.upload),
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context).colorScheme.primary,
-                                            borderRadius: const BorderRadius.only(
-                                              topLeft: Radius.circular(6),
-                                              bottomLeft: Radius.circular(6),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    if (sub.download > 0)
-                                      Expanded(
-                                        flex: scale(sub.download),
-                                        child: Container(
-                                          color: Theme.of(context).colorScheme.secondary,
-                                        ),
-                                      ),
-                                    Expanded(
-                                      flex: (100 - scale(sub.upload) - scale(sub.download)).clamp(0, 100),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context).colorScheme.surface,
-                                          borderRadius: const BorderRadius.only(
-                                            topRight: Radius.circular(6),
-                                            bottomRight: Radius.circular(6),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              sub.total == 0
-                                  ? '上传: ∞  下载: ∞  剩余: ∞'
-                                  : '上传: ${formatGB(sub.upload)}GB  下载: ${formatGB(sub.download)}GB  剩余: ${formatGB(sub.total - sub.upload - sub.download)}GB',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              sub.expire == 0
-                                  ? '到期时间: ∞'
-                                  : '到期时间: ${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).year}-'
-                                  '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).month}-'
-                                  '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).day}',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(6),
+                                        child: Container(
+                                          height: 12,
+                                          color: Theme.of(context).colorScheme.surfaceVariant,
+                                          child: Row(
+                                            children: [
+                                              if (sub.upload > 0)
+                                                Expanded(
+                                                  flex: scale(sub.upload),
+                                                  child: Container(
+                                                    color: Theme.of(context).colorScheme.primary,
+                                                  ),
+                                                ),
+                                              if (sub.download > 0)
+                                                Expanded(
+                                                  flex: scale(sub.download),
+                                                  child: Container(
+                                                    color: Theme.of(context).colorScheme.secondary,
+                                                  ),
+                                                ),
+                                              Expanded(
+                                                flex: (100 - scale(sub.upload) - scale(sub.download))
+                                                    .clamp(0, 100),
+                                                child: Container(
+                                                  color: Theme.of(context).colorScheme.surface,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        sub.total == 0
+                                            ? '上传: ∞  下载: ∞  剩余: ∞'
+                                            : '上传: ${formatGB(sub.upload)}GB  下载: ${formatGB(sub.download)}GB  剩余: ${formatGB(sub.total - sub.upload - sub.download)}GB',
+                                        style: Theme.of(context).textTheme.bodySmall,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        sub.expire == 0
+                                            ? '到期时间: ∞'
+                                            : '到期时间: ${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).year}-'
+                                            '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).month}-'
+                                            '${DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000).day}',
+                                        style: Theme.of(context).textTheme.bodySmall,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
                                 IconButton(
                                   icon: Icon(
-                                    Icons.delete_outlined,
+                                    Icons.delete_outline,
                                     size: 20,
                                     color: Theme.of(context).colorScheme.error,
                                   ),
                                   onPressed: () => _deleteSubscription(context, sub),
                                 ),
                               ],
-                            ),
+                            )
                           ],
                         ),
                       ),
