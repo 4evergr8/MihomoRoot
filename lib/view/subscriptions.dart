@@ -64,51 +64,47 @@ class _SubscriptionViewState extends State<SubscriptionView> {
 
   /// 刷新订阅
   Future<void> _refreshSubscriptions() async {
-    setState(() => isLoading = true);
     if (!mounted) return;
+    setState(() => isLoading = true);
     final close = await showLoadingDialog(context, title: '加载中...');
     try {
       final data = await readYamlAsObject(subscriptionsPath);
-      final list =
-          (data['subscriptions'] is List)
-              ? (data['subscriptions'] as List)
-              : [];
+      final list = (data['subscriptions'] is List) ? (data['subscriptions'] as List) : [];
 
-      List<SubscriptionInfo> updatedSubs = [];
-      for (var e in list) {
+      final settings = await readYamlAsObject(settingsPath);
+      final ua = settings['ua'];
+
+      // 并发刷新订阅
+      final futures = list.map((e) async {
         final sub = SubscriptionInfo.fromMap(Map<String, dynamic>.from(e));
         try {
-          final settings = await readYamlAsObject(settingsPath);
-          final ua = settings['ua'];
           final downloadResult = await downloadYamlFile(sub.link, ua, sub.id);
-          updatedSubs.add(
-            SubscriptionInfo(
-              id: downloadResult.id,
-              link: downloadResult.link,
-              label: downloadResult.label,
-              upload: downloadResult.upload,
-              download: downloadResult.download,
-              total: downloadResult.total,
-              expire: downloadResult.expire,
-            ),
+          return SubscriptionInfo(
+            id: downloadResult.id,
+            link: downloadResult.link,
+            label: downloadResult.label,
+            upload: downloadResult.upload,
+            download: downloadResult.download,
+            total: downloadResult.total,
+            expire: downloadResult.expire,
           );
-
-        } catch (e) {
-
-
-          updatedSubs.add(sub);
+        } catch (_) {
+          return sub; // 出错保留原订阅
         }
-      }
+      }).toList();
+
+      final updatedSubs = await Future.wait(futures);
 
       final newData = {
         'subscriptions': updatedSubs.map((s) => s.toMap()).toList(),
       };
       await writeYamlFromObject(newData, subscriptionsPath);
 
+      if (!mounted) return;
       setState(() => subscriptions = updatedSubs);
     } catch (e) {
       if (!mounted) return;
-      await showErrorDialog(context, '加载错误', e);
+      await showErrorDialog(context, '刷新失败', e);
     } finally {
       close();
       if (mounted) setState(() => isLoading = false);
