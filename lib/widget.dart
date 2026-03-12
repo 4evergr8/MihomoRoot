@@ -43,7 +43,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.add_circle),
-            label: '配置',
+            label: '订阅',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.control_camera),
