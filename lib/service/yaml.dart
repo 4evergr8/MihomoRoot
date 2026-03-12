@@ -3,7 +3,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:yaml_codec/yaml_codec.dart';
 
-Future<Map<String, dynamic>> readYamlAsObject(String sourcePath) async {
+Future<Map<String, dynamic>> areadYamlAsObject(String sourcePath) async {
   try {
     final dir = await getApplicationDocumentsDirectory();
     final localPath = p.join(dir.path, p.basename(sourcePath));
@@ -25,7 +25,15 @@ Future<Map<String, dynamic>> readYamlAsObject(String sourcePath) async {
     rethrow;
   }
 }
-
+Future<Map<String, dynamic>> readYamlAsObject(String sourcePath) async {
+  try {
+    final text = await File(sourcePath).readAsString();
+    final obj = yamlDecode(text);
+    return Map<String, dynamic>.from(obj);
+  } catch (e) {
+    rethrow;
+  }
+}
 Future<void> writeYamlFromObject(
     Map<String, dynamic> data,
     String targetPath,
