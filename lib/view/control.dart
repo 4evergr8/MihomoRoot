@@ -15,51 +15,23 @@ class ControlView extends StatefulWidget {
 class _ControlViewState extends State<ControlView> {
   List<String> delays = ["--", "--", "--"];
   final String settingsPath = '/data/adb/mihomo/settings.yaml';
-  bool running = false;
 
   @override
   void initState() {
     super.initState();
-    checkRunning();
     testDelays();
-
-  }
-
-  Future<void> checkRunning() async {
-    try {
-      final settings = await readYamlAsObject(settingsPath);
-      final port = settings['port'];
-
-      final socket = await Socket.connect(
-        "127.0.0.1",
-        port,
-        timeout: const Duration(seconds: 1),
-      );
-
-      socket.destroy();
-
-      setState(() {
-        running = true;
-      });
-    } catch (_) {
-      setState(() {
-        running = false;
-      });
-    }
   }
 
   Future<void> start() async {
     final settings = await readYamlAsObject(settingsPath);
     final start = settings['start'];
     await Process.start("sh", ["-c", start]);
-    await checkRunning();
   }
 
   Future<void> kill() async {
     final settings = await readYamlAsObject(settingsPath);
     final kill = settings['kill'];
     await Process.start("sh", ["-c", kill]);
-    await checkRunning();
   }
 
   Future<void> openWeb() async {
@@ -98,22 +70,17 @@ class _ControlViewState extends State<ControlView> {
 
   @override
   Widget build(BuildContext context) {
-
-
     return Scaffold(
       appBar: AppBar(title: const Text('控制')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // 第一个容器：一级颜色，核心状态
-            // 第一个容器：核心状态
+            // 核心操作按钮
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: running
-                    ? Theme.of(context).colorScheme.primaryContainer  // 运行时一级容器
-                    : Theme.of(context).colorScheme.errorContainer,   // 未运行时红色容器
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -123,11 +90,9 @@ class _ControlViewState extends State<ControlView> {
                       height: 60,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: running
-                              ? Theme.of(context).colorScheme.onSurfaceVariant // 运行时启动按钮禁用灰
-                              : Theme.of(context).colorScheme.primary,       // 未运行时启动按钮一级颜色
+                          backgroundColor: Theme.of(context).colorScheme.primary,
                         ),
-                        onPressed: running ? null : start,
+                        onPressed: start,
                         child: const Text('启动', style: TextStyle(fontSize: 18)),
                       ),
                     ),
@@ -138,11 +103,9 @@ class _ControlViewState extends State<ControlView> {
                       height: 60,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: running
-                              ? Theme.of(context).colorScheme.error      // 运行时停止按钮红色
-                              : Theme.of(context).colorScheme.onSurfaceVariant,   // 未运行时停止按钮禁用灰
+                          backgroundColor: Theme.of(context).colorScheme.error,
                         ),
-                        onPressed: running ? kill : null,
+                        onPressed: kill,
                         child: const Text('停止', style: TextStyle(fontSize: 18)),
                       ),
                     ),
@@ -151,7 +114,7 @@ class _ControlViewState extends State<ControlView> {
               ),
             ),
             const SizedBox(height: 20),
-            // 第二个容器：三级颜色，测速块
+            // 测速容器
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -191,7 +154,7 @@ class _ControlViewState extends State<ControlView> {
               ),
             ),
             const SizedBox(height: 20),
-            // 第三个容器：二级颜色，WEBUI 和重载配置
+            // WEBUI 和重载配置
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -205,10 +168,9 @@ class _ControlViewState extends State<ControlView> {
                       height: 60,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                          running ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.surface,
+                          backgroundColor: Theme.of(context).colorScheme.secondary,
                         ),
-                        onPressed: running ? openWeb : null,
+                        onPressed: openWeb,
                         child: const Text('WEBUI', style: TextStyle(fontSize: 18)),
                       ),
                     ),
@@ -219,10 +181,9 @@ class _ControlViewState extends State<ControlView> {
                       height: 60,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                          running ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.surface,
+                          backgroundColor: Theme.of(context).colorScheme.secondary,
                         ),
-                        onPressed: running ? reloadConfig : null,
+                        onPressed: reloadConfig,
                         child: const Text('重载配置', style: TextStyle(fontSize: 18)),
                       ),
                     ),
