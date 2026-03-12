@@ -20,8 +20,9 @@ class _ControlViewState extends State<ControlView> {
   @override
   void initState() {
     super.initState();
-    testDelays();
     checkRunning();
+    testDelays();
+
   }
 
   Future<void> checkRunning() async {
