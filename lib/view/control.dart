@@ -74,18 +74,22 @@ class _ControlViewState extends State<ControlView> {
     required IconData icon,
     required VoidCallback onPressed,
     required String value,
-    Color? color,
+    Color? backgroundColor,
   }) {
+    final textColor = backgroundColor != null
+        ? Theme.of(context).colorScheme.onError
+        : Theme.of(context).colorScheme.onPrimary;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           ElevatedButton.icon(
             onPressed: onPressed,
-            icon: Icon(icon),
-            label: Text(label),
+            icon: Icon(icon, color: textColor),
+            label: Text(label, style: TextStyle(color: textColor)),
             style: ElevatedButton.styleFrom(
-              backgroundColor: color,
+              backgroundColor: backgroundColor,
               minimumSize: const Size(120, 50),
             ),
           ),
@@ -94,6 +98,7 @@ class _ControlViewState extends State<ControlView> {
             child: TextField(
               controller: TextEditingController(text: value),
               readOnly: true,
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -120,8 +125,13 @@ class _ControlViewState extends State<ControlView> {
               controller: TextEditingController(text: checkResult),
               readOnly: true,
               maxLines: null,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSecondaryContainer,
+              ),
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
+                isDense: true,
+                contentPadding: EdgeInsets.all(8),
               ),
             ),
           ),
@@ -144,22 +154,19 @@ class _ControlViewState extends State<ControlView> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // 启动按钮行
             _buildButtonRow(
               label: '启动',
               icon: Icons.play_arrow,
               onPressed: start,
               value: startCmd,
             ),
-            // 停止按钮行，error颜色
             _buildButtonRow(
               label: '停止',
               icon: Icons.stop,
               onPressed: stop,
               value: stopCmd,
-              color: Theme.of(context).colorScheme.error,
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
-            // WEBUI按钮行
             _buildButtonRow(
               label: 'WEBUI',
               icon: Icons.language,
@@ -167,7 +174,6 @@ class _ControlViewState extends State<ControlView> {
               value: webuiUrl,
             ),
             const SizedBox(height: 20),
-            // 检查命令结果
             _buildCheckBox(),
           ],
         ),
