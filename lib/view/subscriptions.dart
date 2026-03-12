@@ -325,17 +325,23 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                               if (sub.upload > 0)
                                                 Expanded(
                                                   flex: scale(sub.upload),
-                                                  child: Container(color: Theme.of(context).colorScheme.primary),
+                                                  child: Container(
+                                                    color: Theme.of(context).colorScheme.primary,
+                                                  ),
                                                 ),
                                               if (sub.download > 0)
                                                 Expanded(
                                                   flex: scale(sub.download),
-                                                  child: Container(color: Theme.of(context).colorScheme.secondary),
+                                                  child: Container(
+                                                    color: Theme.of(context).colorScheme.secondary,
+                                                  ),
                                                 ),
-                                              // 保证第三段始终显示，即使总和 >= 100，也保留最小 flex
                                               Expanded(
-                                                flex: 100 - scale(sub.upload + sub.download),
-                                                child: Container(color: Theme.of(context).colorScheme.surface),
+                                                flex: (100 - scale(sub.upload) - scale(sub.download))
+                                                    .clamp(0, 100),
+                                                child: Container(
+                                                  color: Theme.of(context).colorScheme.surface,
+                                                ),
                                               ),
                                             ],
                                           ),
