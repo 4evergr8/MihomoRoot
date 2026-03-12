@@ -17,6 +17,7 @@ dependencies:
   flutter_js: any
   yaml_codec: any
   fluttertoast: any
+  dart_ping: any
 
   dio: any
   flutter:
