@@ -13,25 +13,54 @@ class ControlView extends StatefulWidget {
 }
 
 class _ControlViewState extends State<ControlView> {
-  @override
-  void initState() {
-    super.initState();
-    testDelays(); // 页面进入时自动检测延迟
-  }
 
   List<String> delays = ["--", "--", "--"];
   final String settingsPath = '/data/adb/mihomo/settings.yaml';
+
+  bool running = false;
+
+  @override
+  void initState() {
+    super.initState();
+    testDelays();
+    checkRunning();
+  }
+
+  Future<void> checkRunning() async {
+    try {
+      final settings = await readYamlAsObject(settingsPath);
+      final port = settings['port'];
+
+      final socket = await Socket.connect(
+        "127.0.0.1",
+        port,
+        timeout: const Duration(seconds: 1),
+      );
+
+      socket.destroy();
+
+      setState(() {
+        running = true;
+      });
+    } catch (_) {
+      setState(() {
+        running = false;
+      });
+    }
+  }
 
   Future<void> start() async {
     final settings = await readYamlAsObject(settingsPath);
     final start = settings['start'];
     await Process.start("sh", ["-c", start]);
+    await checkRunning();
   }
 
   Future<void> kill() async {
     final settings = await readYamlAsObject(settingsPath);
     final kill = settings['kill'];
     await Process.start("sh", ["-c", kill]);
+    await checkRunning();
   }
 
   Future<void> openWeb() async {
@@ -47,8 +76,6 @@ class _ControlViewState extends State<ControlView> {
     final port = settings['port'];
     await dio.put('http://127.0.0.1:$port/configs?force=true');
   }
-
-
 
   Future<void> testDelays() async {
     final hosts = [
@@ -97,7 +124,7 @@ class _ControlViewState extends State<ControlView> {
     }
 
     return Card(
-      color: Theme.of(context).colorScheme.surface, // 卡片背景跟主题
+      color: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Stack(
         children: [
@@ -116,7 +143,7 @@ class _ControlViewState extends State<ControlView> {
             top: 4,
             child: IconButton(
               icon: const Icon(Icons.refresh, size: 18),
-              color: Theme.of(context).colorScheme.primary, // 图标使用主题主色
+              color: Theme.of(context).colorScheme.primary,
               onPressed: onRefresh,
             ),
           )
@@ -125,18 +152,13 @@ class _ControlViewState extends State<ControlView> {
     );
   }
 
-  Widget bigButton(String text, VoidCallback onPressed, Color color) {
-
-
+  Widget bigButton(String text, VoidCallback? onPressed, Color color) {
     return Expanded(
       child: SizedBox(
         height: 70,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: color,
-            foregroundColor: color == Theme.of(context).colorScheme.primary
-                ? Theme.of(context).colorScheme.onPrimary
-                : Theme.of(context).colorScheme.onSecondary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -149,20 +171,23 @@ class _ControlViewState extends State<ControlView> {
   }
 
   Widget smallButton(String text, VoidCallback onPressed) {
-
-
+    final isDisabled = !running; // 当未运行时禁用
     return Expanded(
       child: SizedBox(
         height: 50,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.primary, // 背景跟主题
-            foregroundColor: Theme.of(context).colorScheme.onPrimary, // 字体跟主题
+            backgroundColor: isDisabled
+                ? Theme.of(context).colorScheme.surfaceVariant
+                : Theme.of(context).colorScheme.primary,
+            foregroundColor: isDisabled
+                ? Theme.of(context).colorScheme.onSurface
+                : Theme.of(context).colorScheme.onPrimary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          onPressed: onPressed,
+          onPressed: isDisabled ? null : onPressed,
           child: Text(text),
         ),
       ),
@@ -172,6 +197,13 @@ class _ControlViewState extends State<ControlView> {
   @override
   Widget build(BuildContext context) {
 
+    final startColor = running
+        ? Theme.of(context).colorScheme.surfaceVariant
+        : Theme.of(context).colorScheme.primary;
+
+    final stopColor = running
+        ? Theme.of(context).colorScheme.secondary
+        : Theme.of(context).colorScheme.surfaceVariant;
 
     return Scaffold(
       appBar: AppBar(title: const Text('控制')),
@@ -181,9 +213,17 @@ class _ControlViewState extends State<ControlView> {
           children: [
             Row(
               children: [
-                bigButton('启动', start, Theme.of(context).colorScheme.primary),
+                bigButton(
+                  '启动',
+                  running ? null : start,
+                  startColor,
+                ),
                 const SizedBox(width: 16),
-                bigButton('停止', kill, Theme.of(context).colorScheme.secondary),
+                bigButton(
+                  '停止',
+                  running ? kill : null,
+                  stopColor,
+                ),
               ],
             ),
             const SizedBox(height: 20),
@@ -191,7 +231,7 @@ class _ControlViewState extends State<ControlView> {
             const SizedBox(height: 20),
             Row(
               children: [
-                smallButton('打开网页', openWeb),
+                smallButton('WebUI', openWeb),
                 const SizedBox(width: 16),
                 smallButton('重载配置', reloadConfig),
               ],
