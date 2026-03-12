@@ -272,8 +272,12 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                 itemBuilder: (context, index) {
                   final sub = subscriptions[index];
                   final totalValue = sub.total;
-                  int scale(int value) =>
-                      totalValue == 0 ? 0 : (value * 100 ~/ totalValue);
+
+                  int scale(int value) {
+                    if (totalValue == 0) return 0;
+                    final v = value * 100 ~/ totalValue;
+                    return v.clamp(0, 100);
+                  }
                   final isSelected = sub.id == selectedId;
 
                   return InkWell(
@@ -288,8 +292,8 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                     borderRadius: BorderRadius.circular(12),
                     child: Card(
                       color: isSelected
-                          ? Theme.of(context).colorScheme.primary.withOpacity(0.2)
-                          : Theme.of(context).cardColor, // 卡片背景使用主题色
+                          ? Theme.of(context).colorScheme.primaryContainer
+                          : Theme.of(context).colorScheme.surface,
                       margin: const EdgeInsets.only(bottom: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -304,47 +308,47 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                             const SizedBox(height: 12),
-                            Container(
-                              height: 12,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(6),
-                                color: Theme.of(context).colorScheme.surfaceVariant, // 背景条主题色
-                              ),
-                              child: Row(
-                                children: [
-                                  if (sub.upload > 0)
-                                    Expanded(
-                                      flex: scale(sub.upload),
-                                      child: ClipRRect(
-                                        borderRadius: const BorderRadius.only(
-                                          topLeft: Radius.circular(6),
-                                          bottomLeft: Radius.circular(6),
-                                        ),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: Container(
+                                height: 12,
+                                color: Theme.of(context).colorScheme.surfaceVariant,
+                                child: Row(
+                                  children: [
+                                    if (sub.upload > 0)
+                                      Expanded(
+                                        flex: scale(sub.upload),
                                         child: Container(
-                                          color: Theme.of(context).colorScheme.primary,
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context).colorScheme.primary,
+                                            borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(6),
+                                              bottomLeft: Radius.circular(6),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    if (sub.download > 0)
+                                      Expanded(
+                                        flex: scale(sub.download),
+                                        child: Container(
+                                          color: Theme.of(context).colorScheme.secondary,
+                                        ),
+                                      ),
+                                    Expanded(
+                                      flex: (100 - scale(sub.upload) - scale(sub.download)).clamp(0, 100),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).colorScheme.surface,
+                                          borderRadius: const BorderRadius.only(
+                                            topRight: Radius.circular(6),
+                                            bottomRight: Radius.circular(6),
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  if (sub.download > 0)
-                                    Expanded(
-                                      flex: scale(sub.download),
-                                      child: Container(
-                                        color: Theme.of(context).colorScheme.secondary,
-                                      ),
-                                    ),
-                                  Expanded(
-                                    flex: 100 - scale(sub.upload) - scale(sub.download),
-                                    child: ClipRRect(
-                                      borderRadius: const BorderRadius.only(
-                                        topRight: Radius.circular(6),
-                                        bottomRight: Radius.circular(6),
-                                      ),
-                                      child: Container(
-                                        color: Theme.of(context).colorScheme.background,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
