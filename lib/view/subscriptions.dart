@@ -271,10 +271,10 @@ class _SubscriptionViewState extends State<SubscriptionView> {
               expire: downloadResult.expire,
             ),
           );
-        } catch (_) {
+        } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('下载失败: $link')),
+              SnackBar(content: Text('下载失败: $link,错误: $e')),
             );
           }
         }
