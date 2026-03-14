@@ -25,7 +25,7 @@ class DownloadResult {
 }
 
 /// 下载 YAML 文件并保存到 /data/adb/mihomo
-Future<DownloadResult> downloadYamlFile(String url, String ua, String id) async {
+Future<DownloadResult> downloadYamlFile(String url, String ua, String id,int timeout) async {
   final dio = Dio();
   final dir = await getApplicationDocumentsDirectory();
   final filePath = '${dir.path}/$id.yaml';
@@ -41,8 +41,8 @@ Future<DownloadResult> downloadYamlFile(String url, String ua, String id) async 
           'User-Agent': ua,
         },
         validateStatus: (s) => s == 200,
-        sendTimeout: const Duration(seconds: 2),
-        receiveTimeout: const Duration(seconds: 2),
+        sendTimeout: Duration(seconds: timeout),
+        receiveTimeout: Duration(seconds: timeout),
       ),
     );
     final headers = response.headers.map;
