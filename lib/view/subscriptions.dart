@@ -326,24 +326,24 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                   }
                   final isSelected = sub.id == selectedId;
 
-                  return InkWell(
-                    onTap: () async {
-                      setState(() => selectedId = sub.id);
-                      final settings = await readYamlAsObject(settingsPath);
-                      settings['selected'] = sub.id;
-                      await writeYamlFromObject(settings, settingsPath);
+                  return Card(
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.primaryContainer
+                        : Theme.of(context).colorScheme.surface,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    clipBehavior: Clip.antiAlias, // 裁剪内部InkWell
+                    child: InkWell(
+                      onTap: () async {
+                        setState(() => selectedId = sub.id);
+                        final settings = await readYamlAsObject(settingsPath);
+                        settings['selected'] = sub.id;
+                        await writeYamlFromObject(settings, settingsPath);
 
-                      await _onSubscriptionTap(sub.id);
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: Card(
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primaryContainer
-                          : Theme.of(context).colorScheme.surface,
-                      margin: const EdgeInsets.only(bottom: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                        await _onSubscriptionTap(sub.id);
+                      },
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
