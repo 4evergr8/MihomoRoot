@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:quick_settings/quick_settings.dart';
+import 'package:quick_settings_with_flutter_plugins/quick_settings.dart';
 import '../theme/theme.dart';
 import '../theme/util.dart';
 import '../widget.dart';
