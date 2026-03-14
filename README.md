@@ -16,12 +16,15 @@
   </p>
 
 ## 项目碎碎念😅
+
 我真的裂开,Flclash在手机上开了各种权限,总会出现偶尔连不上的情况    
 之前用MIUI14,甚至会自动取消Flclash的无限制后台权限,重新改成"智能优化后台运行",换了ColorOS15,还是会出现断联    
 找了一些使用Root权限的mihomo实现,除了无法切换订阅就是根本连不上,只能自己写一个了......    
 软件使用tun模式启动mihomo,通过改变config.yaml后重载实现切换订阅,没有分应用代理,靠订阅内规则实现分流    
 Flutter的SDK真占内存,16G内存,开个IDEA,开个GitHub Desktop,再开两个Chrome标签页,回头一看,啊,IDEA崩了😅
+
 ## 主要功能
+
 ### 订阅页面
 
 * 下载Clash订阅
@@ -30,7 +33,6 @@ Flutter的SDK真占内存,16G内存,开个IDEA,开个GitHub Desktop,再开两个
 * 批量更新订阅
 * 从返回头自动获取配置名称和流量信息
 
-
 ### 控制页面
 
 * 启动核心
@@ -38,29 +40,25 @@ Flutter的SDK真占内存,16G内存,开个IDEA,开个GitHub Desktop,再开两个
 * 打开WebUI
 * 查看核心状态
 
-
-
 ## 软件截图
 
 <div align="center">
   <img src="./assets/1.jpg" width="30%" style="margin-right: 5%;">
   <img src="./assets/2.jpg" width="30%" style="margin-left: 5%;">
+  <img src="./assets/3.jpg" width="30%" style="margin-left: 5%;">
 </div>
 
-
-
 ## 食用方法
+
 * 前往[Release](https://github.com/4evergr8/mihomoR/releases)下载对应架构的APK和mihomo.zip
 * 安装APK并授予Root权限,解压mihomo.zip到data/adb文件夹下,确保mihomo核心位于/data/adb/mihomo/mohomo
 * 添加订阅并启动核心
 * 前往WebUI观察运行情况
 
-
-
-
-
 ## 配置文件
+
 ### settings.yaml 软件设置
+
 ```yaml
 start: "su -c 'cd /data/adb/mihomo && nohup ./mihomo -d . >/dev/null 2>&1 &'"
 #mihomo启动命令
@@ -79,6 +77,7 @@ selected: example
 ```
 
 ### subscriptions.yaml 订阅信息
+
 ```yaml
 subscriptions:
   - id: "example"
@@ -95,9 +94,15 @@ subscriptions:
     #订阅套餐总量(来自服务商)
     expire: 1775696117
     #订阅到期时间(来自服务商)
+    update: 0
+    #上次更新时间
+
+
 
 ```
+
 ### rewrite.yaml 非递归配置覆写
+
 ```yaml
 port:
 mixed-port:
@@ -182,7 +187,7 @@ proxy-groups:
     timeout: 2000
     max-failed-times: 2
     tolerance: 50
-    proxies: []
+    proxies: [ ]
 
   - name: 🧠人工智能🧠
     type: url-test
@@ -195,8 +200,9 @@ proxy-groups:
     timeout: 2000
     max-failed-times: 2
     tolerance: 50
-    proxies: []
+    proxies: [ ]
 ```
+
 ## 引用
 
 * 本项目采用GithubAction进行编译
