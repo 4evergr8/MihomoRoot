@@ -43,7 +43,7 @@ public final class GeneratedPluginRegistrant {
     try {
       flutterEngine.getPlugins().add(new io.apparence.quick_settings.QuickSettingsPlugin());
     } catch (Exception e) {
-      Log.e(TAG, "Error registering plugin quick_settings, io.apparence.quick_settings.QuickSettingsPlugin", e);
+      Log.e(TAG, "Error registering plugin quick_settings_with_flutter_plugins, io.apparence.quick_settings.QuickSettingsPlugin", e);
     }
     try {
       flutterEngine.getPlugins().add(new dev.fluttercommunity.plus.share.SharePlusPlugin());
