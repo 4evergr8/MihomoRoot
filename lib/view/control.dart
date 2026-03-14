@@ -44,7 +44,7 @@ class _ControlViewState extends State<ControlView> {
 
   Future<void> stop() async {
     if (stopCmd.isEmpty) return;
-    await Process.start("sh", ["-c", stopCmd]);
+    await Process.run("sh", ["-c", stopCmd]);
   }
 
   Future<void> openWeb() async {
