@@ -15,7 +15,7 @@ environment:
 dependencies:
   yaml_codec: any
   fluttertoast: any
-  quick_settings: any
+  quick_settings_with_flutter_plugins: ^1.3.0
   dio: any
   flutter:
     sdk: flutter
