@@ -8,42 +8,70 @@ import '../service/yaml.dart';
 
 const String settingsPath = '/data/adb/mihomo/settings.yaml';
 
-/// 执行重启 mihomo
-void _restartMihomo() async {
+bool _mihomoRunning = false;
+
+Future<void> _stopMihomo() async {
+  final settings = await readYamlAsObject(settingsPath);
+  final stopCmd = settings['kill'] ?? '';
+  if (stopCmd.isNotEmpty) {
+    await Process.run("sh", ["-c", stopCmd]);
+  }
+}
+
+Future<void> _startMihomo() async {
   try {
     final settings = await readYamlAsObject(settingsPath);
     final stopCmd = settings['kill'] ?? '';
     final startCmd = settings['start'] ?? '';
 
-    if (stopCmd.isNotEmpty) await Process.run("sh", ["-c", stopCmd]);
-    if (startCmd.isNotEmpty) await Process.start("sh", ["-c", startCmd]);
+    // 先停止
+    if (stopCmd.isNotEmpty) {
+      await Process.run("sh", ["-c", stopCmd]);
+    }
+
+    // 再启动
+    if (startCmd.isNotEmpty) {
+      await Process.start("sh", ["-c", startCmd]);
+    }
   } catch (_) {}
 }
 
 /// Tile 点击回调
-@pragma("vm:entry-point")
+@pragma('vm:entry-point')
 Tile onTileClicked(Tile tile) {
-  _restartMihomo();                    // 执行重启
-  tile.label = "重启 mihomo";           // 显示文字
-  tile.drawableName = "quick_settings_base_icon"; // 图标
-  tile.contentDescription = "重启 mihomo 服务";   // 无障碍描述
-  tile.stateDescription = "已执行";               // 状态说明
-  tile.subtitle = "点击可重启";                    // 副标题
+  if (_mihomoRunning) {
+    _stopMihomo();
+    _mihomoRunning = false;
+    tile.subtitle = "点击启动";
+    tile.contentDescription = "mihomo 已停止";
+  } else {
+    _stopMihomo().then((_) => _startMihomo());
+    _mihomoRunning = true;
+    tile.subtitle = "点击停止";
+    tile.contentDescription = "mihomo 已启动";
+  }
+
+  tile.label = "mihomo";
+  tile.drawableName = "quick_settings_base_icon";
   return tile;
 }
 
 /// Tile 添加回调
-@pragma("vm:entry-point")
-Tile? onTileAdded(Tile tile) => tile;
+@pragma('vm:entry-point')
+Tile? onTileAdded(Tile tile) {
+  tile.label = "mihomo";
+  tile.drawableName = "quick_settings_base_icon";
+  tile.contentDescription = "mihomo 核心开关";
+  return tile;
+}
 
 /// Tile 移除回调
-@pragma("vm:entry-point")
+@pragma('vm:entry-point')
 void onTileRemoved() {}
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 注册 Tile 回调
   QuickSettings.setup(
     onTileClicked: onTileClicked,
     onTileAdded: onTileAdded,
@@ -59,7 +87,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final brightness = View.of(context).platformDispatcher.platformBrightness;
-
     TextTheme textTheme = createTextTheme(context, "Noto Sans", "Noto Sans");
     MaterialTheme theme = MaterialTheme(textTheme);
 
@@ -82,9 +109,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // 请求用户添加 Quick Settings Tile
     QuickSettings.addTileToQuickSettings(
-      label: "重启 mihomo",
+      label: "mihomo",
       drawableName: "quick_settings_base_icon",
     );
   }
