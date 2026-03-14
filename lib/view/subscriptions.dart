@@ -73,12 +73,13 @@ class _SubscriptionViewState extends State<SubscriptionView> {
 
       final settings = await readYamlAsObject(settingsPath);
       final ua = settings['ua'];
+      final timeout = settings['timeout'];
 
       // 并发刷新订阅
       final futures = list.map((e) async {
         final sub = SubscriptionInfo.fromMap(Map<String, dynamic>.from(e));
         try {
-          final downloadResult = await downloadYamlFile(sub.link, ua, sub.id);
+          final downloadResult = await downloadYamlFile(sub.link, ua, sub.id,timeout);
           return SubscriptionInfo(
             id: downloadResult.id,
             link: downloadResult.link,
@@ -238,6 +239,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
     try {
       final settings = await readYamlAsObject(settingsPath);
       final ua = settings['ua'];
+      final timeout = settings['timeout'];
 
       final links = result
           .split('\n')
@@ -258,7 +260,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
         try {
           final id = DateTime.now().millisecondsSinceEpoch.toString();
 
-          final downloadResult = await downloadYamlFile(link, ua, id);
+          final downloadResult = await downloadYamlFile(link, ua, id,timeout);
 
           subscriptions.add(
             SubscriptionInfo(
