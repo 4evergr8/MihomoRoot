@@ -418,8 +418,26 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                   }
                                 },
                                 itemBuilder: (_) => [
-                                  const PopupMenuItem(value: 1, child: Text('刷新')),
-                                  const PopupMenuItem(value: 2, child: Text('删除')),
+                                  PopupMenuItem(
+                                    value: 1,
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.refresh, size: 18, color: Theme.of(context).colorScheme.primary),
+                                        const SizedBox(width: 8),
+                                        const Text('刷新'),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 2,
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.delete_outline, size: 18, color: Theme.of(context).colorScheme.error),
+                                        const SizedBox(width: 8),
+                                        const Text('删除'),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
                             ],
