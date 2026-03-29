@@ -336,6 +336,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // 上传下载进度条和信息
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(6),
                                   child: Container(
@@ -344,25 +345,10 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                     child: Row(
                                       children: [
                                         if (sub.upload > 0)
-                                          Expanded(
-                                            flex: scale(sub.upload),
-                                            child: Container(
-                                              color: Theme.of(context).colorScheme.primary,
-                                            ),
-                                          ),
+                                          Expanded(flex: scale(sub.upload), child: Container(color: Theme.of(context).colorScheme.primary)),
                                         if (sub.download > 0)
-                                          Expanded(
-                                            flex: scale(sub.download),
-                                            child: Container(
-                                              color: Theme.of(context).colorScheme.secondary,
-                                            ),
-                                          ),
-                                        Expanded(
-                                          flex: (100 - scale(sub.upload) - scale(sub.download)).clamp(0, 100),
-                                          child: Container(
-                                            color: Theme.of(context).colorScheme.surface,
-                                          ),
-                                        ),
+                                          Expanded(flex: scale(sub.download), child: Container(color: Theme.of(context).colorScheme.secondary)),
+                                        Expanded(flex: (100 - scale(sub.upload) - scale(sub.download)).clamp(0, 100), child: Container(color: Theme.of(context).colorScheme.surface)),
                                       ],
                                     ),
                                   ),
@@ -391,17 +377,49 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                               ],
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            icon: Icon(
-                              Icons.delete_outline,
-                              size: 20,
-                              color: Theme.of(context).colorScheme.error,
-                            ),
-                            onPressed: () => _deleteSubscription(context, sub),
+                          Column(
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.refresh, size: 20, color: Theme.of(context).colorScheme.primary),
+                                onPressed: () async {
+                                  final settings = await readYamlAsObject(settingsPath);
+                                  final ua = settings['ua'];
+                                  final timeout = settings['timeout'];
+                                  final close = await showLoadingDialog(context, title: '刷新中...');
+                                  try {
+                                    final downloadResult = await downloadYamlFile(sub.link, ua, sub.id, timeout);
+                                    final updatedSub = SubscriptionInfo(
+                                      id: downloadResult.id,
+                                      link: downloadResult.link,
+                                      label: downloadResult.label,
+                                      upload: downloadResult.upload,
+                                      download: downloadResult.download,
+                                      total: downloadResult.total,
+                                      expire: downloadResult.expire,
+                                      update: downloadResult.update,
+                                    );
+                                    final index = subscriptions.indexWhere((s) => s.id == sub.id);
+                                    if (index != -1) subscriptions[index] = updatedSub;
+
+                                    final data = {'subscriptions': subscriptions.map((s) => s.toMap()).toList()};
+                                    await writeYamlFromObject(data, subscriptionsPath);
+                                    setState(() {});
+                                  } catch (e) {
+                                    if (!mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('刷新失败: $e')));
+                                  } finally {
+                                    if (mounted) close();
+                                  }
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete_outline, size: 20, color: Theme.of(context).colorScheme.error),
+                                onPressed: () => _deleteSubscription(context, sub),
+                              ),
+                            ],
                           ),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ),
